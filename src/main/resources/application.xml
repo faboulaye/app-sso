@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
+
+    <context:property-placeholder location="classpath:application.properties"/>
+
+    <bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
+        <property name="poolName" value="app-sso"/>
+        <property name="connectionTestQuery" value="SELECT 1"/>
+        <property name="driverClassName" value="${db.driver}"/>
+        <property name="jdbcUrl" value="${db.url}"/>
+        <property name="maximumPoolSize" value="${db.hikari.maximumPoolSize}"/>
+        <property name="idleTimeout" value="${db.hikari.idleTimeout}"/>
+
+        <property name="dataSourceProperties">
+            <props>
+                <prop key="url">${db.url}</prop>
+                <prop key="user">${db.username}</prop>
+                <prop key="password">${db.password}</prop>
+            </props>
+        </property>
+    </bean>
+
+    <!-- HikariCP configuration -->
+    <bean id="poolDataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
+        <constructor-arg ref="hikariConfig"/>
+    </bean>
+
+    <bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+        <property name="showSql" value="${hibernate.show_sql}"/>
+        <property name="generateDdl" value="${hibernate.generateDdl}"/>
+        <property name="databasePlatform" value="org.hibernate.dialect.H2Dialect"/>
+    </bean>
+
+    <bean id="entityManager" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="poolDataSource"/>
+        <property name="packagesToScan" value="com.app.sso"/>
+        <property name="jpaVendorAdapter" ref="jpaVendorAdapter"/>
+        <property name="jpaPropertyMap">
+            <props>
+                <prop key="hibernate.hbm2ddl.auto">${hibernate.hbm2ddl.auto}</prop>
+                <prop key="hibernate.show_sql">${hibernate.show_sql}</prop>
+                <prop key="hibernate.format_sql">${hibernate.format_sql}</prop>
+                <prop key="hibernate.dialect">${hibernate.dialect}</prop>
+                <prop key="hibernate.ejb.naming_strategy">${hibernate.ejb.naming_strategy}</prop>
+            </props>
+        </property>
+    </bean>
+    <context:component-scan base-package="com.app.sso"/>
+    <context:annotation-config/>
+    <bean id="txManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManager"/>
+    </bean>
+    <tx:annotation-driven transaction-manager="txManager"/>
+    <jpa:repositories base-package="com.app.sso.repository" entity-manager-factory-ref="entityManager"
+                      transaction-manager-ref="txManager"/>
+</beans>
