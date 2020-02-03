@@ -12,6 +12,7 @@ public class Authority implements GrantedAuthority {
     private Long id;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "AUTHORITY")
     private AuthorityType authority;
 
     public Authority(AuthorityType authority) {

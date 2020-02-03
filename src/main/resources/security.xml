@@ -10,10 +10,12 @@
     <http use-expressions="true">
         <intercept-url pattern="/login*" access="isAnonymous()"/>
         <intercept-url pattern="/register*" access="isAnonymous()"/>
-        <intercept-url pattern="/portal/**" access="isAuthenticated() and hasRole('ROLE_USER')"/>
+        <intercept-url pattern="/portal/**" access="isAuthenticated() and hasRole('ROLE_USER')" />
         <intercept-url pattern="/admin/**" access="isAuthenticated() and hasRole('ROLE_ADMIN')"/>
         <form-login login-page='/login.html'
+                    login-processing-url="/login"
                     default-target-url="/portal/home.html"
+
                     authentication-failure-url="/login.html?error=true"/>
         <logout logout-success-url="/login.html"/>
     </http>
@@ -22,8 +24,7 @@
         <authentication-provider ref="basicAuthenticationProvider"/>
     </authentication-manager>
 
-    <beans:bean id="passwordEncoder"
-                class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+    <beans:bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
     <beans:bean id="basicAuthenticationProvider"
                 class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
         <beans:property name="userDetailsService" ref="userService"/>

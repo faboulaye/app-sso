@@ -1,11 +1,9 @@
 package com.app.sso.bean;
 
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.CollectionUtils;
 
 import javax.persistence.*;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -16,23 +14,32 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-
+    @Column(name = "USERNAME")
     private String username;
+
+    @Column(name = "PASSWORD")
     private String password;
 
+    @Column(name = "FIRST_NAME")
     private String firstname;
+
+    @Column(name = "LAST_NAME")
     private String lastname;
+
+    @Column(name = "EMAIL")
     private String email;
 
+    @Column(name = "ENABLED")
     private Boolean enabled;
+
     private Boolean accountNonExpired;
     private Boolean accountNonLocked;
     private boolean credentialsNonExpired;
 
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinTable(name = "user_authority",
-            joinColumns = { @JoinColumn(name = "user_id") },
-            inverseJoinColumns = { @JoinColumn(name = "authority_id") })
+    @JoinTable(name = "USER_AUTHORITY",
+            joinColumns = { @JoinColumn(name = "USER_ID") },
+            inverseJoinColumns = { @JoinColumn(name = "AUTHORITY_ID") })
     private Set<Authority> authorities = new HashSet<>();
 
     public User(String username, String password) {

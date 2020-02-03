@@ -16,7 +16,7 @@ import java.util.Optional;
 import static com.app.sso.service.UserService.SERVICE_NAME;
 
 @Service(SERVICE_NAME)
-public class UserServiceImp implements UserService, UserDetailsService {
+public class UserServiceImp implements UserService {
 
     private static final Logger log = LogManager.getLogger(UserServiceImp.class);
 
