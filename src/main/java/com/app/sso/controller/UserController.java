@@ -7,13 +7,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 public class UserController {
@@ -33,28 +31,35 @@ public class UserController {
         return null;
     }
 
-    @GetMapping("/")
-    public String login(Model model) {
-        model.addAttribute("message", "Hello Spring MVC 5!");
-        return "login";
+
+    @GetMapping({"/admin/home"})
+    public String admin(@RequestParam(value="name", required=false, defaultValue="World") String name, Model model) {
+        model.addAttribute("name", name);
+        return "admin/home.html";
     }
 
-    @RequestMapping(value = "/register", method = RequestMethod.POST)
+    @GetMapping({"/portal/home"})
+    public String portal(@RequestParam(value="name", required=false, defaultValue="World") String name, Model model) {
+        model.addAttribute("name", name);
+        return "portal/home.html";
+    }
+
+    @PostMapping("/doRegistration")
     public ModelAndView createNewUser(User user, BindingResult bindingResult) {
         ModelAndView modelAndView = new ModelAndView();
-        UserDetails userExists = service.loadUserByUsername(user.getUsername());
-        if (userExists != null) {
+        Optional<User> userExists = service.findByUsername(user.getUsername());
+        if (userExists.isPresent()) {
             bindingResult
                     .rejectValue("userName", "error.user",
                             "There is already a user registered with the user name provided");
         }
         if (bindingResult.hasErrors()) {
-            modelAndView.setViewName("registration");
+            modelAndView.setViewName("login.html");
         } else {
             User refreshUser = service.save(user);
             modelAndView.addObject("successMessage", "User has been registered successfully");
             modelAndView.addObject("user", refreshUser);
-            modelAndView.setViewName("registration");
+            modelAndView.setViewName("login.html");
         }
         return modelAndView;
     }

@@ -15,6 +15,10 @@ public class Authority implements GrantedAuthority {
     @Column(name = "AUTHORITY")
     private AuthorityType authority;
 
+    public Authority() {
+
+    }
+
     public Authority(AuthorityType authority) {
         this.authority = authority;
     }

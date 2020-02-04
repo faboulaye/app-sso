@@ -32,15 +32,24 @@ public class User implements UserDetails {
     @Column(name = "ENABLED")
     private Boolean enabled;
 
-    private Boolean accountNonExpired;
-    private Boolean accountNonLocked;
-    private boolean credentialsNonExpired;
+    @Column(name = "ACCOUNT_NON_EXPIRED")
+    private Boolean accountNonExpired = Boolean.FALSE;
+
+    @Column(name = "ACCOUNT_NON_LOCKED")
+    private Boolean accountNonLocked = Boolean.FALSE;
+
+    @Column(name = "CREDENTIALS_NON_EXPIRED")
+    private boolean credentialsNonExpired = Boolean.FALSE;
 
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(name = "USER_AUTHORITY",
             joinColumns = { @JoinColumn(name = "USER_ID") },
             inverseJoinColumns = { @JoinColumn(name = "AUTHORITY_ID") })
     private Set<Authority> authorities = new HashSet<>();
+
+    public User() {
+
+    }
 
     public User(String username, String password) {
         this.username = username;
@@ -91,22 +100,22 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return false;
+        return this.accountNonExpired;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return false;
+        return this.accountNonLocked;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return false;
+        return this.credentialsNonExpired;
     }
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return this.enabled;
     }
 
     @Override

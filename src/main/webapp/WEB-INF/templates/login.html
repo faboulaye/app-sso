@@ -27,10 +27,7 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="login.html">Login</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="register.html">Register</a>
+                    <a class="nav-link" th:href="@{/register}">Register</a>
                 </li>
             </ul>
         </div>
@@ -43,7 +40,7 @@
                 <div class="card">
                     <div class="card-header">Login</div>
                     <div class="card-body">
-                        <form th:action="@{/login}" method="POST">
+                        <form th:action="@{/doLogin}" method="POST">
                             <div class="form-group row">
                                 <label for="username" class="col-md-4 col-form-label text-md-right">Login</label>
                                 <div class="col-md-6">
