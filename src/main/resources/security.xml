@@ -7,7 +7,7 @@
                 http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
                 http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <!-- Basic authentication -->
+    <!-- Basic authentication
     <http realm="basic" use-expressions="true">
         <intercept-url pattern="/login*" access="isAnonymous()"/>
         <intercept-url pattern="/register*" access="isAnonymous()"/>
@@ -19,7 +19,7 @@
                     authentication-success-handler-ref="myAuthenticationSuccessHandler"
                     authentication-failure-url="/login.html?error=true"/>
         <logout logout-success-url="/login.html"/>
-    </http>
+    </http>-->
 
     <beans:bean id="myAuthenticationSuccessHandler"
                 class="com.app.sso.handler.CustomAuthenticationSuccessHandler"/>
@@ -34,44 +34,8 @@
         <beans:property name="passwordEncoder" ref="passwordEncoder"/>
     </beans:bean>
 
-
-    <!-- Saml authentication -->
-    <beans:bean id="samlAuthenticationProvider"
-                class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
-        <beans:property name="userDetailsService" ref="userService"/>
-    </beans:bean>
-    <beans:bean id="samlFilter" class="org.springframework.security.web.FilterChainProxy">
-        <filter-chain-map request-matcher="ant">
-            <filter-chain pattern="/saml/login/**" filters="samlEntryPoint"/>
-            <filter-chain pattern="/saml/logout/**" filters="samlLogoutFilter"/>
-            <filter-chain pattern="/saml/metadata/**" filters="metadataDisplayFilter"/>
-            <filter-chain pattern="/saml/SSO/**" filters="samlWebSSOProcessingFilter"/>
-            <filter-chain pattern="/saml/HoKSSO/**" filters="samlWebSSOHoKProcessingFilter"/>
-            <filter-chain pattern="/saml/SingleLogout/**" filters="samlLogoutProcessingFilter"/>
-            <filter-chain pattern="/saml/discovery/**" filters="samlIDPDiscovery"/>
-        </filter-chain-map>
-    </beans:bean>
-
-    <beans:bean id="samlEntryPoint" class="org.springframework.security.saml.SAMLEntryPoint">
-        <beans:property name="defaultProfileOptions">
-            <beans:bean class="org.springframework.security.saml.websso.WebSSOProfileOptions">
-                <!--property name="binding" value="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"/-->
-                <beans:property name="binding" value="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"/>
-                <beans:property name="includeScoping" value="false"/>
-            </beans:bean>
-        </beans:property>
-    </beans:bean>
-    <!-- Initialization of OpenSAML library-->
-    <beans:bean class="org.springframework.security.saml.SAMLBootstrap"/>
-    <beans:bean id="velocityEngine" class="org.springframework.security.saml.util.VelocityFactory" factory-method="getEngine"/>
-    <beans:bean id="parserPool" class="org.opensaml.xml.parse.StaticBasicParserPool" init-method="initialize"/>
-    <beans:bean id="parserPoolHolder" class="org.springframework.security.saml.parser.ParserPoolHolder"/>
-
-    <http realm="saml" entry-point-ref="samlEntryPoint" use-expressions="true">
-        <custom-filter  ref="metadataGeneratorFilter"/>
-        <custom-filter after="BASIC_AUTH_FILTER" ref="samlFilter"/>
-    </http>
-
+    <!-- Saml Config -->
+    <beans:import resource="classpath:/saml-security.xml"/>
 
     <!-- Authentication manager -->
     <authentication-manager>

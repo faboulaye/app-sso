@@ -7,8 +7,9 @@
         </Console>
     </Appenders>
     <Loggers>
-        <Logger name="com.app" level="DEBUG"/>
-        <Root level="INFO" >
+        <Logger name="com.app.sso" level="DEBUG"/>
+        <Logger name="org.springframework.security.saml" level="DEBUG" />
+        <Root level="DEBUG" >
             <AppenderRef ref="console" />
         </Root>
     </Loggers>
