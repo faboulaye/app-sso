@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.saml.SAMLCredential;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import java.util.List;
 import java.util.Optional;
@@ -55,6 +57,17 @@ public class UserServiceImp implements UserService {
             throw new UsernameNotFoundException("User not found.");
         }
         log.info("loadUserByUsername() : {}", username);
+        return user;
+    }
+
+    @Override
+    public UserDetails loadUserBySAML(SAMLCredential samlCredential) throws UsernameNotFoundException {
+        Assert.notNull(samlCredential, "Saml credential is required");
+        User user = userRepository.findByEmail(samlCredential.getNameID().getValue());
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found.");
+        }
+        log.info("loadUserBySAML() : {}", samlCredential.getNameID().getValue());
         return user;
     }
 }

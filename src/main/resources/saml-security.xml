@@ -18,17 +18,11 @@
         <beans:constructor-arg ref="multiThreadedHttpConnectionManager" />
     </beans:bean>
 
-    <!--  SAML Authentication Provider responsible for validating of received SAML -->
-    <beans:bean id="samlAuthenticationProvider"
-                class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
-        <beans:property name="userDetailsService" ref="userService"/>
-    </beans:bean>
-
     <!-- Provider of default SAML Context -->
     <beans:bean id="samlContextProvider" class="org.springframework.security.saml.context.SAMLContextProviderImpl" />
 
     <!-- Initialization of OpenSAML library -->
-    <beans:bean class="org.springframework.security.saml.SAMLBootstrap"/>
+    <beans:bean id="samlBootstrap" class="org.springframework.security.saml.SAMLBootstrap"/>
 
     <!-- SAML 2.0 WebSSO Assertion Consumer -->
     <beans:bean id="webSSOProfileConsumer" class="org.springframework.security.saml.websso.WebSSOProfileConsumerImpl" />
@@ -39,9 +33,6 @@
     <!-- SAML 2.0 Web SSO profile -->
     <beans:bean id="webSSOprofile" class="org.springframework.security.saml.websso.WebSSOProfileImpl" />
 
-    <!-- SAML 2.0 Holder-of-Key Web SSO profile -->
-    <beans:bean id="hokWebSSOProfile" class="org.springframework.security.saml.websso.WebSSOProfileConsumerHoKImpl" />
-
     <!-- SAML 2.0 ECP profile -->
     <beans:bean id="ecpprofile" class="org.springframework.security.saml.websso.WebSSOProfileECPImpl" />
 
@@ -51,21 +42,28 @@
     <!-- SAML 2.0 ECP profile -->
     <beans:bean id="singleLogout" class="org.springframework.security.saml.websso.SingleLogoutProfileImpl" />
 
+    <!--  SAML Authentication Provider responsible for validating of received SAML -->
+    <beans:bean id="samlAuthenticationProvider"
+                class="org.springframework.security.saml.SAMLAuthenticationProvider">
+        <beans:property name="userDetails" ref="userService"/>
+        <beans:property name="consumer" ref="webSSOProfileConsumer" />
+    </beans:bean>
+
     <!-- Key manager -->
     <beans:bean id="keyManager" class="org.springframework.security.saml.key.JKSKeyManager">
-        <beans:constructor-arg value="classpath:saml/samlKeystore.jks"/>
+        <beans:constructor-arg value="classpath:saml/saml.jks"/>
         <beans:constructor-arg type="java.lang.String" value="nalle123"/>
         <beans:constructor-arg>
             <beans:map>
-                <beans:entry key="ssocircle" value="nalle123"/>
+                <beans:entry key="saml" value="nalle123"/>
             </beans:map>
         </beans:constructor-arg>
-        <beans:constructor-arg type="java.lang.String" value="ssocircle"/>
+        <beans:constructor-arg type="java.lang.String" value="saml"/>
     </beans:bean>
 
     <beans:bean id="webSSOProfileOptions" class="org.springframework.security.saml.websso.WebSSOProfileOptions">
-        <!--property name="binding" value="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"/-->
-        <!-- <beans:property name="binding" value="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"/> -->
+        <beans:property name="binding" value="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"/>
+        <!--<beans:property name="binding" value="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"/> -->
         <beans:property name="includeScoping" value="false"/>
     </beans:bean>
 
@@ -78,8 +76,7 @@
     <beans:bean id="extendedMetadata" class="org.springframework.security.saml.metadata.ExtendedMetadata">
         <beans:property name="idpDiscoveryEnabled" value="true" />
         <beans:property name="signingAlgorithm" value="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256" />
-        <beans:property name="signingKey" value="ssocircle" />
-        <beans:property name="alias" value="ssocircle" />
+        <beans:property name="alias" value="saml" />
         <beans:property name="signMetadata" value="true" />
         <beans:property name="ecpEnabled" value="true" />
     </beans:bean>
@@ -122,8 +119,8 @@
 
     <!-- Filter automatically generates default SP metadata -->
     <beans:bean id="metadataGenerator" class="org.springframework.security.saml.metadata.MetadataGenerator">
-        <beans:property name="entityId" value="http://localhost:8081/sso" />
-        <beans:property name="entityBaseURL" value="http://localhost:8081/sso" />
+        <beans:property name="entityId" value="http://localhost:8080/sso" />
+        <beans:property name="entityBaseURL" value="http://localhost:8080/sso" />
         <beans:property name="extendedMetadata" ref="extendedMetadata" />
         <beans:property name="includeDiscoveryExtension" value="false" />
         <beans:property name="keyManager" ref="keyManager" />
@@ -131,6 +128,11 @@
 
     <!-- The filter is waiting for connections on URL suffixed with filterSuffix and presents SP metadata there -->
     <beans:bean id="metadataDisplayFilter" class="org.springframework.security.saml.metadata.MetadataDisplayFilter" />
+
+    <beans:bean id="samlWebSSOProcessingFilter" class="org.springframework.security.saml.SAMLProcessingFilter">
+        <beans:property name="authenticationManager" ref="authenticationManager" />
+        <beans:property name="authenticationSuccessHandler" ref="myAuthenticationSuccessHandler" />
+    </beans:bean>
 
     <beans:bean id="metadataGeneratorFilter" class="org.springframework.security.saml.metadata.MetadataGeneratorFilter">
         <beans:constructor-arg ref="metadataGenerator" />
@@ -204,16 +206,11 @@
             <filter-chain pattern="/saml/login/**" filters="samlEntryPoint"/>
             <filter-chain pattern="/saml/logout/**" filters="samlLogoutFilter"/>
             <filter-chain pattern="/saml/metadata/**" filters="metadataDisplayFilter"/>
-            <!-- <filter-chain pattern="/saml/SSO/**" filters="samlWebSSOProcessingFilter"/> -->
+            <filter-chain pattern="/saml/SSO/**" filters="samlWebSSOProcessingFilter"/>
             <!-- <filter-chain pattern="/saml/HoKSSO/**" filters="samlWebSSOHoKProcessingFilter"/>  -->
             <filter-chain pattern="/saml/SingleLogout/**" filters="samlLogoutProcessingFilter"/>
             <filter-chain pattern="/saml/discovery/**" filters="samlDiscovery"/>
         </filter-chain-map>
     </beans:bean>
-
-    <http realm="saml" entry-point-ref="samlEntryPoint" use-expressions="true">
-        <custom-filter  ref="metadataGeneratorFilter" before="CHANNEL_FILTER"/>
-        <custom-filter  ref="samlFilter" after="BASIC_AUTH_FILTER"/>
-    </http>
 
 </beans:beans>

@@ -7,20 +7,6 @@
                 http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
                 http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <!-- Basic authentication
-    <http realm="basic" use-expressions="true">
-        <intercept-url pattern="/login*" access="isAnonymous()"/>
-        <intercept-url pattern="/register*" access="isAnonymous()"/>
-        <intercept-url pattern="/portal/**" access="isAuthenticated() and hasRole('ROLE_USER')"/>
-        <intercept-url pattern="/admin/**" access="isAuthenticated() and hasRole('ROLE_ADMIN')"/>
-        <form-login login-page='/login.html'
-                    login-processing-url="/doLogin"
-                    default-target-url="/portal/home.html"
-                    authentication-success-handler-ref="myAuthenticationSuccessHandler"
-                    authentication-failure-url="/login.html?error=true"/>
-        <logout logout-success-url="/login.html"/>
-    </http>-->
-
     <beans:bean id="myAuthenticationSuccessHandler"
                 class="com.app.sso.handler.CustomAuthenticationSuccessHandler"/>
 
@@ -37,8 +23,28 @@
     <!-- Saml Config -->
     <beans:import resource="classpath:/saml-security.xml"/>
 
+    <!-- Form and Saml authentication -->
+    <http pattern="/saml/**" entry-point-ref="samlEntryPoint" use-expressions="true">
+        <custom-filter  ref="metadataGeneratorFilter" before="CHANNEL_FILTER"/>
+        <custom-filter  ref="samlFilter" after="BASIC_AUTH_FILTER"/>
+        <csrf disabled="true" />
+    </http>
+
+    <http use-expressions="true" authentication-manager-ref="authenticationManager">
+        <intercept-url pattern="/login*" access="isAnonymous()"/>
+        <intercept-url pattern="/register*" access="isAnonymous()"/>
+        <intercept-url pattern="/portal/**" access="isAuthenticated() and hasRole('ROLE_USER')"/>
+        <intercept-url pattern="/admin/**" access="isAuthenticated() and hasRole('ROLE_ADMIN')"/>
+        <form-login login-page='/login.html'
+                    login-processing-url="/doLogin"
+                    default-target-url="/portal/home.html"
+                    authentication-success-handler-ref="myAuthenticationSuccessHandler"
+                    authentication-failure-url="/login.html?error=true"/>
+        <logout logout-success-url="/login.html"/>
+    </http>
+
     <!-- Authentication manager -->
-    <authentication-manager>
+    <authentication-manager id="authenticationManager">
         <authentication-provider ref="basicAuthenticationProvider"/>
         <authentication-provider ref="samlAuthenticationProvider"/>
     </authentication-manager>
