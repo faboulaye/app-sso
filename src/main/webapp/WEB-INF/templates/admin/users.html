@@ -1,13 +1,62 @@
 <!doctype html>
 <html lang="en"
       xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5"
-      layout:decorate="~{layout}">
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Fonts -->
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css?family=Raleway:300,400,600" rel="stylesheet" type="text/css">
+    <link rel="icon" href="Favicon.png">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+</head>
 <body>
-<!-- Content starts -->
-<section class="my-3 p-3 bg-white rounded box-shadow" layout:fragment="content">
-    <h2>Welcome to the admin users page</h2>
-</section>
+<ul>
+    <li>
+        <a th:href="@{/admin/home}">Home</a>
+    </li>
+    <li>
+        <a th:href="@{/admin/users}">Users</a>
+    </li>
+    <li>
+        <a th:href="@{/profile}">Profile</a>
+    </li>
+    <li>
+        <a th:href="@{/logout}">Logout</a>
+    </li>
+    <li>
+        <a th:href="@{/saml/logout?local=true}">Logout saml</a>
+    </li>
+</ul>
+<div class="container">
+    <h2>Welcome to the admin home page <span sec:authentication="name"/></h2>
+    <form action="#" th:object="${forms}" method="post">
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">login</th>
+                <th scope="col">First name</th>
+                <th scope="col">Last name</th>
+                <th scope="col">Email</th>
+                <th scope="col">Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr scope="row" th:each="user, itemStat : *{users}">
+                <td><span th:text="${user.id}" /></td>
+                <td><span th:text="${user.username}" /></td>
+                <td><span th:text="${user.firstname}" /></td>
+                <td><span th:text="${user.lastname}" /></td>
+                <td><span th:text="${user.lastname}" /></td>
+                <td><span th:text="${user.enabled}" /></td>
+            </tr>
+            </tbody>
+        </table>
+    </form>
+</div>
 </body>
 </html>

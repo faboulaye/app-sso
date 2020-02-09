@@ -5,6 +5,9 @@ import com.app.sso.repository.UserRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -12,8 +15,11 @@ import org.springframework.security.saml.SAMLCredential;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static com.app.sso.service.UserService.SERVICE_NAME;
 
@@ -26,18 +32,21 @@ public class UserServiceImp implements UserService {
     private UserRepository userRepository;
 
     @Override
+    @Transactional
     public User save(User user) {
         return userRepository.save(user);
     }
 
     @Override
+    @Transactional
     public void delete(User user) {
         userRepository.delete(user);
     }
 
     @Override
     public List<User> listAll() {
-        return null;
+        Iterable<User> userIterable = userRepository.findAll();
+        return StreamSupport.stream(userIterable.spliterator(), false).collect(Collectors.toList());
     }
 
     @Override
@@ -69,5 +78,15 @@ public class UserServiceImp implements UserService {
         }
         log.info("loadUserBySAML() : {}", samlCredential.getNameID().getValue());
         return user;
+    }
+
+    @Override
+    public Optional<User> getAuthenticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String currentUserName = authentication.getName();
+            return findByUsername(currentUserName);
+        }
+        return Optional.empty();
     }
 }

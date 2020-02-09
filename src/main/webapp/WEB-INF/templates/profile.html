@@ -16,9 +16,6 @@
 <body>
 <ul>
     <li>
-        <a th:href="@{/portal/home}">Home</a>
-    </li>
-    <li>
         <a th:href="@{/profile}">Profile</a>
     </li>
     <li>
@@ -29,7 +26,7 @@
     </li>
 </ul>
 <div class="container">
-    <h2>Welcome to the portal home page <span sec:authentication="name"/></h2>
+    <h2>Welcome to your profile <span sec:authentication="name"/></h2>
 </div>
 </body>
 </html>

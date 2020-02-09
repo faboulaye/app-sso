@@ -97,8 +97,22 @@
         <beans:property name="parserPool" ref="parserPool" />
     </beans:bean>
 
+    <beans:bean id="httpMetadataProvider2" class="org.opensaml.saml2.metadata.provider.HTTPMetadataProvider">
+        <beans:constructor-arg ref="backgroundTimer" />
+        <beans:constructor-arg ref="httpClient" />
+        <beans:constructor-arg value="https://dev-434346.okta.com/app/exk254xoxwIqI9rC94x6/sso/saml/metadata" />
+        <beans:property name="parserPool" ref="parserPool" />
+    </beans:bean>
+
     <beans:bean id="idp-ssocircle" class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
         <beans:constructor-arg ref="httpMetadataProvider" />
+        <beans:constructor-arg ref="extendedMetadata" />
+        <beans:property name="metadataTrustCheck" value="true" />
+        <beans:property name="metadataRequireSignature" value="false" />
+    </beans:bean>
+
+    <beans:bean id="idp-okta" class="org.springframework.security.saml.metadata.ExtendedMetadataDelegate">
+        <beans:constructor-arg ref="httpMetadataProvider2" />
         <beans:constructor-arg ref="extendedMetadata" />
         <beans:property name="metadataTrustCheck" value="true" />
         <beans:property name="metadataRequireSignature" value="false" />
@@ -109,6 +123,7 @@
         <beans:constructor-arg>
             <beans:list>
                 <beans:ref bean="idp-ssocircle" />
+                <beans:ref bean="idp-okta" />
             </beans:list>
         </beans:constructor-arg>
     </beans:bean>
